@@ -30,8 +30,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public String welcomeById(@PathVariable String id) {
-        return "🍀 Welcome to users endpoint !! " + id;
+    public User getUserById(@PathVariable String id) {
+        return userService.getUserById(Long.parseLong(id));
     }
     
     @PostMapping("")
