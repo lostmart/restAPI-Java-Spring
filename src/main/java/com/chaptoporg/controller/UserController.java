@@ -5,24 +5,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 
 
 
 @RestController
+@RequestMapping("/api/users")
 
 public class UserController {
-    @GetMapping("/users")
+    @GetMapping
     public String welcome() {
         return "🍀 Welcome to users endpoint !!";
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public String welcomeById(@PathVariable String id) {
         return "🍀 Welcome to users endpoint !! " + id;
     }
     
-    @PostMapping("/users")
+    @PostMapping("")
     public String postMethodName(@RequestBody String entity) {
         //TODO: process POST request
         
