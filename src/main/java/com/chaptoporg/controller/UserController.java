@@ -1,5 +1,7 @@
 package com.chaptoporg.controller;
 
+import com.chaptoporg.dto.LoginRequest;
+import com.chaptoporg.dto.LoginResponse;
 import com.chaptoporg.model.User;
 import com.chaptoporg.service.UserService;
 import com.chaptoporg.service.JwtService;
@@ -34,47 +36,12 @@ public class UserController {
         }
 
         String token = jwtService.createToken(user.getEmail());
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(new LoginResponse(token));
     }
 
     @GetMapping("/me/{id}")
     public User getUserById(@PathVariable String id) {
         return userService.getUserById(Long.parseLong(id));
-    }
-
-    public static class LoginRequest {
-        private String email;
-        private String password;
-
-        // Getters and setters
-
-        public String getEmail() {
-            return email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        // Constructor
-
-        public LoginRequest(String email, String password) {
-            this.email = email;
-            this.password = password;
-        }
-
-        public static class LoginResponse {
-            private String token;
-
-            public LoginResponse(String token) {
-                this.token = token;
-            }
-
-            public String getToken() {
-                return token;
-            }
-        }
-
     }
 
 }
