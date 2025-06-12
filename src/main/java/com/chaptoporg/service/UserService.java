@@ -14,6 +14,10 @@ public class UserService {
     
     @Autowired
     private UserRepo userRepo;
+
+    public User createUser(User user) {
+        return userRepo.save(user); // This uses the built-in save() method
+    }
     
     public List<User> getAllUsers() {
         return userRepo.findAll(); // This uses the built-in findAll() method
@@ -21,6 +25,8 @@ public class UserService {
 
     public User getUserById(long id) {
         return userRepo.findById(id)
-                      .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
+    
+    
 }
