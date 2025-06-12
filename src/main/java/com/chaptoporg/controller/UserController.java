@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,9 +40,11 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(token));
     }
 
-    @GetMapping("/me/{id}")
-    public User getUserById(@PathVariable String id) {
-        return userService.getUserById(Long.parseLong(id));
+    @GetMapping("/me")
+    public ResponseEntity<?> getMe(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userService.findByEmail(email);
+        return ResponseEntity.ok(user);
     }
 
 }
