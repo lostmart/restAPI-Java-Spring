@@ -27,6 +27,10 @@ public class UserService {
         return userRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
+
+    public User findByEmail(String email) {
+        return userRepo.findByEmail(email);
+    }
     
     
 }
