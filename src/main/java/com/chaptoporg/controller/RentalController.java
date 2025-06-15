@@ -1,6 +1,6 @@
 package com.chaptoporg.controller;
 
-import com.chaptoporg.dto.LoginRequest;
+
 import com.chaptoporg.dto.RentalRequest;
 import com.chaptoporg.model.Rental;
 import com.chaptoporg.service.RentalService;
@@ -24,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 
 
-import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 
 
-import java.nio.file.*;
+
 import java.util.UUID;
 
 @RestController
