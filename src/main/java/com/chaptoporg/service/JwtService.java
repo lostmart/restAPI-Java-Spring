@@ -2,6 +2,10 @@ package com.chaptoporg.service;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.chaptoporg.model.User;
 
@@ -13,51 +17,68 @@ import java.util.Map;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "your-very-strong-secret-key-should-be-at-least-256-bits-long";
-    private static final long EXPIRATION_TIME = 3600000; // 1 hour in milliseconds
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    @Value("${jwt.expiration}")
+    private long expirationTime;
 
-    // Existing method (keep this)
+    private Key key;
+
+    // Initialize the key after properties are set
+    @PostConstruct
+    public void init() {
+        if (secretKey == null || secretKey.length() < 32) {
+            throw new IllegalStateException("JWT secret key must be at least 256 bits (32 characters) long");
+        }
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
+
     public String createToken(String userId) {
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // New method for generating token from User object
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
         claims.put("email", user.getEmail());
         // Add any other user claims you need
-        
+
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(user.getEmail()) // Using email as subject
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // Existing validation method (keep this)
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token);
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
+        } catch (SignatureException e) {
+            // Invalid JWT signature
+        } catch (MalformedJwtException e) {
+            // Invalid JWT token
+        } catch (ExpiredJwtException e) {
+            // Expired JWT token
+        } catch (UnsupportedJwtException e) {
+            // Unsupported JWT token
+        } catch (IllegalArgumentException e) {
+            // JWT claims string is empty
         }
+        return false;
     }
 
-    // Existing extraction method (keep this)
     public String extractUserId(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -65,5 +86,14 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getSubject();
+    }
+
+    // Additional method to extract all claims
+    public Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

@@ -39,29 +39,29 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers(
-                            "/",
-                            "/api/auth/register",
-                            "/api/auth/login",
-                            "/api/auth/refresh-token",
-                            "/v3/api-docs/**",
-                            "/swagger-ui/**",
-                            "/swagger-ui.html"
-                        ).permitAll()
-                        
+                                "/",
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/refresh-token",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/uploads/**")
+                        .permitAll()
+
                         // Rental endpoints
                         .requestMatchers(HttpMethod.GET, "/api/rentals/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/rentals").hasRole("USER")
-                        
+
                         // Message endpoints
                         .requestMatchers(HttpMethod.GET, "/api/messages").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/messages").hasRole("USER")
-                        
+
                         // User endpoints
                         .requestMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
-                        
+
                         // Secure all other endpoints
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -83,7 +83,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
