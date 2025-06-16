@@ -1,9 +1,13 @@
 package com.chaptoporg.controller;
 
+import com.chaptoporg.dto.ErrorResponse;
 import com.chaptoporg.dto.LoginRequest;
 import com.chaptoporg.dto.LoginResponse;
 import com.chaptoporg.model.User;
 import com.chaptoporg.service.UserService;
+
+import jakarta.validation.Valid;
+
 import com.chaptoporg.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,19 +29,33 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         User createdUser = userService.createUser(user);
+        // Important: no passwords !! in the response
+        createdUser.setPassword(null);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        // Find user by email
         User user = userService.findByEmail(loginRequest.getEmail());
 
-        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        // Verify user exists and password matches
+        if (user == null || !userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Invalid email or password"));
         }
 
-        String token = jwtService.createToken(user.getEmail());
-        return ResponseEntity.ok(new LoginResponse(token));
+        // Generate JWT token
+        String token = jwtService.generateToken(user);
+
+        // Create response DTO
+        LoginResponse response = new LoginResponse(
+                token,
+                user.getId(),
+                user.getEmail(),
+                user.getName());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/me")
