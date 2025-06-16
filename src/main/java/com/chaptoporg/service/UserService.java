@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.chaptoporg.exception.EmailAlreadyExistsException;
 import com.chaptoporg.exception.ResourceNotFoundException;
 import com.chaptoporg.model.User;
 import com.chaptoporg.repo.UserRepo;
@@ -22,10 +23,14 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        String hashedPassword = passwordEncoder.encode(user.getPassword()); // hashed password
-        user.setPassword(hashedPassword);
-        return userRepo.save(user);
+    if (userRepo.existsByEmail(user.getEmail())) {
+        throw new EmailAlreadyExistsException("This email is already taken");
     }
+
+    String hashedPassword = passwordEncoder.encode(user.getPassword());
+    user.setPassword(hashedPassword);
+    return userRepo.save(user);
+}
 
     public List<User> getAllUsers() {
         return userRepo.findAll(); // This uses the built-in findAll() method
