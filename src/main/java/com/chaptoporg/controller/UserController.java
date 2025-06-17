@@ -3,6 +3,7 @@ package com.chaptoporg.controller;
 import com.chaptoporg.dto.ErrorResponse;
 import com.chaptoporg.dto.LoginRequest;
 import com.chaptoporg.dto.LoginResponse;
+import com.chaptoporg.exception.EmailAlreadyExistsException;
 import com.chaptoporg.model.User;
 import com.chaptoporg.service.UserService;
 
@@ -26,12 +27,31 @@ public class UserController {
     @Autowired
     private JwtService jwtService;
 
+    // @PostMapping("/register")
+    // public ResponseEntity<User> registerUser(@RequestBody User user) {
+    // User createdUser = userService.createUser(user);
+    // // Important: no passwords !! in the response
+    // createdUser.setPassword(null);
+    // return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    // }
+
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
-        // Important: no passwords !! in the response
-        createdUser.setPassword(null);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        try {
+            User createdUser = userService.createUser(user);
+
+            // Generate JWT token for the newly registered user
+            String token = jwtService.generateToken(createdUser);
+
+            // Create response similar to login
+            LoginResponse response = new LoginResponse(
+                    token);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (EmailAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse("Email already exists"));
+        }
     }
 
     @PostMapping("/login")
@@ -50,10 +70,7 @@ public class UserController {
 
         // Create response DTO
         LoginResponse response = new LoginResponse(
-                token,
-                user.getId(),
-                user.getEmail(),
-                user.getName());
+                token);
 
         return ResponseEntity.ok(response);
     }
