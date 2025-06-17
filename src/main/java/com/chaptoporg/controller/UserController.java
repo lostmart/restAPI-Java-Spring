@@ -27,14 +27,6 @@ public class UserController {
     @Autowired
     private JwtService jwtService;
 
-    // @PostMapping("/register")
-    // public ResponseEntity<User> registerUser(@RequestBody User user) {
-    // User createdUser = userService.createUser(user);
-    // // Important: no passwords !! in the response
-    // createdUser.setPassword(null);
-    // return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-    // }
-
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {

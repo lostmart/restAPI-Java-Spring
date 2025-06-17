@@ -21,9 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 
-import org.springframework.security.core.Authentication;
-
-
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,51 +30,70 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.Optional;
 
-
-
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+
+/**
+ * Controller that handles CRUD operations for Rental entities.
+ */
 @RestController
 @RequestMapping("/api/rentals")
+@Tag(name = "Rentals", description = "Endpoints for managing rentals")
 public class RentalController {
-
 
     @Autowired
     private RentalService rentalService;
 
+    /**
+     * Returns a list of all rentals.
+     * @return all rental records
+     */
+    @Operation(summary = "Get all rentals")
+    @ApiResponse(responseCode = "200", description = "List of rentals")
     @GetMapping
     public Iterable<Rental> getAllRentals() {
         return rentalService.getAllRentals();
     }
 
+    /**
+     * Returns a specific rental by its ID.
+     * @param id ID of the rental
+     * @return rental if found
+     */
+    @Operation(summary = "Get rental by ID")
+    @ApiResponse(responseCode = "200", description = "Rental found")
+    @ApiResponse(responseCode = "404", description = "Rental not found")
     @GetMapping("/{id}")
     public Optional<Rental> getRentalById(@PathVariable Long id) {
         return rentalService.getRentalById(id);
     }
 
-    @GetMapping("/debug")
-    public ResponseEntity<String> debug(Authentication authentication) {
-        String username = authentication.getName(); // principal, typically the email
-        String roles = authentication.getAuthorities().toString();
-
-        System.out.println("JwtAuthFilter ran for: " + username);
-
-        return ResponseEntity.ok("Authenticated as: " + username + ", roles: " + roles);
-    }
-
+    /**
+     * Creates a new rental entry with an image upload.
+     * @param rentalRequest rental data
+     * @param bindingResult validation results
+     * @return created rental or error details
+     */
+    @Operation(summary = "Create a new rental with image upload")
+    @ApiResponse(responseCode = "200", description = "Rental created")
+    @ApiResponse(responseCode = "400", description = "Validation error")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createRental(
             @Valid @ModelAttribute RentalRequest rentalRequest,
             BindingResult bindingResult) {
-        
-        // Validate input
+
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
         MultipartFile picture = rentalRequest.getPicture();
-
-        // Validate file exists and has content type
         if (picture == null || picture.isEmpty()) {
             return ResponseEntity.badRequest().body("Picture file is required");
         }
@@ -94,52 +110,44 @@ public class RentalController {
         }
 
         try {
-            // Generate unique filename
-            String originalFilename = StringUtils.cleanPath(
-                rentalRequest.getPicture().getOriginalFilename()
-            );
+            String originalFilename = StringUtils.cleanPath(picture.getOriginalFilename());
             String fileName = UUID.randomUUID() + "_" + originalFilename;
-            
-            // Create upload directory if needed
+
             Path uploadPath = Paths.get("uploads");
             Files.createDirectories(uploadPath);
-            
-            // Save file
+
             Path targetLocation = uploadPath.resolve(fileName);
-            Files.copy(
-                rentalRequest.getPicture().getInputStream(),
-                targetLocation,
-                StandardCopyOption.REPLACE_EXISTING
-            );
-            
-            // Convert and save rental
+            Files.copy(picture.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
             Rental rental = convertToEntity(rentalRequest, fileName);
             Rental savedRental = rentalService.saveRental(rental);
-            
+
             return ResponseEntity.ok(savedRental);
-            
+
         } catch (IOException ex) {
-            return ResponseEntity.internalServerError()
-                .body("File upload failed: " + ex.getMessage());
+            return ResponseEntity.internalServerError().body("File upload failed: " + ex.getMessage());
         }
     }
 
-    private Rental convertToEntity(RentalRequest rentalRequest, String fileName) {
-        Rental rental = new Rental();
-        rental.setName(rentalRequest.getName());
-        rental.setSurface(rentalRequest.getSurface());
-        rental.setPrice(rentalRequest.getPrice());
-        rental.setDescription(rentalRequest.getDescription());
-        rental.setOwnerId(rentalRequest.getOwnerId().intValue());
-        rental.setPicture(fileName);
-        return rental;
-    }
-
+    /**
+     * Deletes a rental by its ID.
+     * @param id ID of the rental
+     */
+    @Operation(summary = "Delete rental by ID")
+    @ApiResponse(responseCode = "204", description = "Rental deleted")
     @DeleteMapping("/{id}")
     public void deleteRental(@PathVariable Long id) {
         rentalService.deleteRental(id);
     }
 
+    /**
+     * Updates an existing rental.
+     * @param id ID of the rental
+     * @param rental rental data to update
+     * @return updated rental or newly created rental
+     */
+    @Operation(summary = "Update an existing rental")
+    @ApiResponse(responseCode = "200", description = "Rental updated or created")
     @PutMapping("/{id}")
     public Rental updateRental(@PathVariable Long id, @RequestBody Rental rental) {
         return rentalService.getRentalById(id)
@@ -158,4 +166,20 @@ public class RentalController {
                 });
     }
 
+    /**
+     * Converts a RentalRequest DTO to a Rental entity.
+     * @param rentalRequest the request DTO
+     * @param fileName uploaded image filename
+     * @return Rental entity
+     */
+    private Rental convertToEntity(RentalRequest rentalRequest, String fileName) {
+        Rental rental = new Rental();
+        rental.setName(rentalRequest.getName());
+        rental.setSurface(rentalRequest.getSurface());
+        rental.setPrice(rentalRequest.getPrice());
+        rental.setDescription(rentalRequest.getDescription());
+        rental.setOwnerId(rentalRequest.getOwnerId().intValue());
+        rental.setPicture(fileName);
+        return rental;
+    }
 }
