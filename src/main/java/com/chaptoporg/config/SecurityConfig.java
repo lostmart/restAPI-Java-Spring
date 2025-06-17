@@ -3,7 +3,6 @@ package com.chaptoporg.config;
 import com.chaptoporg.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,7 +41,6 @@ public class SecurityConfig {
                                 "/",
                                 "/api/auth/register",
                                 "/api/auth/login",
-                                "/api/auth/refresh-token",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -50,15 +48,14 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Rental endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/rentals/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/rentals").hasRole("USER")
+                        // .requestMatchers(HttpMethod.POST, "/api/rentals").hasRole("USER")
 
-                        // Message endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/messages").hasRole("USER")
-                        .requestMatchers(HttpMethod.POST, "/api/messages").hasRole("USER")
+                        // // Message endpoints
+                        // .requestMatchers(HttpMethod.GET, "/api/messages").hasRole("USER")
+                        // .requestMatchers(HttpMethod.POST, "/api/messages").hasRole("USER")
 
-                        // User endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
+                        // // User endpoints
+                        // .requestMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
 
                         // Secure all other endpoints
                         .anyRequest().authenticated())
@@ -79,7 +76,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200")); // Update with your frontend URL
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
