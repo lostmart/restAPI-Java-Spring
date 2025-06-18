@@ -47,16 +47,6 @@ public class SecurityConfig {
                                 "/uploads/**")
                         .permitAll()
 
-                        // Rental endpoints
-                        // .requestMatchers(HttpMethod.POST, "/api/rentals").hasRole("USER")
-
-                        // // Message endpoints
-                        // .requestMatchers(HttpMethod.GET, "/api/messages").hasRole("USER")
-                        // .requestMatchers(HttpMethod.POST, "/api/messages").hasRole("USER")
-
-                        // // User endpoints
-                        // .requestMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
-
                         // Secure all other endpoints
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

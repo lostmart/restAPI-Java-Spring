@@ -1,20 +1,97 @@
-# 📦 ChâTop REST API – Backend
+# 🏡 ChâTop – Spring Boot REST API
 
-This is the backend API for the ChâTop seasonal rental platform, developed with **Spring Boot**
+This is the **backend API** for the ChâTop platform – a seasonal rental listing service. It handles user authentication with JWT, rental management, and messaging features. Built with **_Spring Boot_** and connected to a **_MySQL database._**
 
 ## 🛠️ Stack & Prerequisites
 
-- Java: 17 (also compatible with Java 11)
-- Spring Boot: 3.5.x
-- Dependencies:
-  - spring-boot-starter-web
-  - spring-boot-starter-security
-  - spring-boot-starter-data-jpa
-  - mysql-connector-j
-- Database: MySQL 8+
+- **Java 17** (also compatible with Java 11)
+- **Spring Boot 3.5.x**
+  **MySQL 8+**
+- **JWT** (for user authentication)
+- **Swagger (OpenAPI)** for live API documentation
+- **Postman / Mockoon** for API testing
 
 ## Tools required:
 
 - Mockoon (for simulating API responses)
 - Postman (for testing endpoints)
 - Swagger/OpenAPI (for API documentation)
+
+## 📁 Project Structure
+
+```
+src/main/java/com/chaptoporg/
+├── controller/ # REST controllers
+├── dto/ # Request & Response DTOs
+├── exception/ # Custom exceptions
+├── model/ # JPA Entities
+├── repo/ # Spring Data JPA repositories
+├── service/ # Business logic layer
+├── security/ # JWT filter
+├── config/ # Security and OpenAPI config
+```
+
+## 🔧 Installation Instructions
+
+### 1. **Clone the repo**
+
+```bash
+git clone https://github.com/your-user/chapTop.git
+cd chapTop
+```
+
+### 2. Configure the database
+```sql
+CREATE DATABASE chatop;
+```
+
+- In application.properties, adjust these values if needed:
+
+```
+spring.datasource.url=jdbc:mysql://localhost:3306/chatop
+spring.datasource.username=admin
+spring.datasource.password=admin
+```
+
+### 3. Build and run the project
+
+```bash
+./mvnw clean install
+./mvnw spring-boot:run
+```
+
+The API will run at: `http://localhost:3000`
+
+
+## 🔐 JWT Authentication
+
+
+### Register
+
+`POST /api/auth/register`
+
+- Request body:
+
+```json
+{
+  "email": "test@example.com",
+  "password": "abc123",
+  "name": "John Doe",
+}
+```
+
+### Login
+
+`POST /api/auth/login`
+
+- Request Body
+
+```json
+{
+  "email": "test@example.com",
+  "password": "abc123"
+}
+```
+
+
+
