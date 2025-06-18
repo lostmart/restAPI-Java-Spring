@@ -6,6 +6,9 @@ import com.chaptoporg.dto.LoginResponse;
 import com.chaptoporg.exception.EmailAlreadyExistsException;
 import com.chaptoporg.model.User;
 import com.chaptoporg.service.UserService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import com.chaptoporg.service.JwtService;
 
 import jakarta.validation.Valid;
@@ -86,6 +89,7 @@ public class UserController {
      * @param authentication contains the current user's authentication context
      * @return the authenticated user's data
      */
+    @SecurityRequirement(name = "BearerAuth")
     @GetMapping("/me")
     public ResponseEntity<?> getMe(Authentication authentication) {
         // Get user email from the authentication context
