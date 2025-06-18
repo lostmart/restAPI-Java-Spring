@@ -11,12 +11,6 @@ This is the **backend API** for the ChâTop platform – a seasonal rental listi
 - **Swagger (OpenAPI)** for live API documentation
 - **Postman / Mockoon** for API testing
 
-## Tools required:
-
-- Mockoon (for simulating API responses)
-- Postman (for testing endpoints)
-- Swagger/OpenAPI (for API documentation)
-
 ## 📁 Project Structure
 
 ```
@@ -41,6 +35,7 @@ cd chapTop
 ```
 
 ### 2. Configure the database
+
 ```sql
 CREATE DATABASE chatop;
 ```
@@ -62,9 +57,7 @@ spring.datasource.password=admin
 
 The API will run at: `http://localhost:3000`
 
-
 ## 🔐 JWT Authentication
-
 
 ### Register
 
@@ -74,9 +67,9 @@ The API will run at: `http://localhost:3000`
 
 ```json
 {
-  "email": "test@example.com",
-  "password": "abc123",
-  "name": "John Doe",
+	"email": "test@example.com",
+	"password": "abc123",
+	"name": "John Doe"
 }
 ```
 
@@ -88,10 +81,66 @@ The API will run at: `http://localhost:3000`
 
 ```json
 {
-  "email": "test@example.com",
-  "password": "abc123"
+	"email": "test@example.com",
+	"password": "abc123"
 }
 ```
 
+✅ A valid JWT token will be returned.
 
+## 🧪 Testing Endpoints
 
+### 🔸 Swagger UI
+
+Live, interactive API docs available at:
+
+```bash
+http://localhost:3000/swagger-ui.html
+```
+
+- ➡ To access secured endpoints:
+
+1. Click “Authorize” at the top.
+2. Paste your JWT token in this format:
+
+```
+Bearer eyJhbGciOiJIUzI1NiJ9...
+```
+
+3. Click Authorize, then test secured routes like `/api/auth/me`
+
+## 🧰 Tools Recommended
+
+- **_Postman:_** Send API requests manually
+- **_Mockoon:_** Simulate endpoints if needed
+- **_phpMyAdmin:_** View & edit MySQL data easily
+
+## ⚠️ Notes
+
+- The default role assigned to a user is ROLE_USER. Roles are currently static in the JwtAuthFilter.java.
+
+- spring.jpa.hibernate.ddl-auto=update will create or update tables on app start. Disable this in production.
+
+- Uploaded files are stored in the uploads/ directory (configurable).
+
+## 🧩 Swagger / OpenAPI
+
+The project uses springdoc-openapi:
+
+![Tux, the Linux mascot](/swagger.png)
+
+```xml
+<dependency>
+  <groupId>org.springdoc</groupId>
+  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+  <version>2.8.9</version>
+</dependency>
+```
+
+Security is configured with a bearer token scheme so Swagger can send the token automatically after clicking "Authorize".
+
+## 💬 Contact
+
+For questions or improvements, feel free to open an issue or fork the project.
+
+✅ This project is a backend only — intended to be used with an Angular or other frontend client.
