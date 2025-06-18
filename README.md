@@ -115,6 +115,34 @@ Bearer eyJhbGciOiJIUzI1NiJ9...
 - **_Mockoon:_** Simulate endpoints if needed
 - **_phpMyAdmin:_** View & edit MySQL data easily
 
+
+## 🖼️ Image Uploads for Rentals
+
+This project supports uploading an image file when creating a new rental.
+
+- Endpoint:
+```bash
+POST /api/rentals
+Content-Type: multipart/form-data
+```
+
+- Required form fields:
+  - name (String)
+  - surface (Integer)
+  - price (Integer)
+  - description (String)
+  - ownerId (Integer)
+  - picture (Image file)   
+
+- Uploaded images are:
+  - Renamed with a UUID prefix to avoid filename collisions.
+  - Stored locally in the /uploads directory relative to the project root.
+  - Served statically at the path:
+`http://localhost:3000/uploads/{filename}`
+
+The directory is created automatically at runtime. Make sure the application has write permission to the project root.
+
+
 ## ⚠️ Notes
 
 - The default role assigned to a user is ROLE_USER. Roles are currently static in the JwtAuthFilter.java.
