@@ -1,13 +1,10 @@
 package com.chaptoporg.controller;
 
-
 import com.chaptoporg.dto.RentalRequest;
+import com.chaptoporg.dto.RentalUpdateRequest;
 import com.chaptoporg.model.Rental;
 import com.chaptoporg.service.RentalService;
 import org.springframework.util.StringUtils;
-
-
-
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +12,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,9 +29,6 @@ import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 
 /**
  * Controller that handles CRUD operations for Rental entities.
@@ -53,6 +43,7 @@ public class RentalController {
 
     /**
      * Returns a list of all rentals.
+     * 
      * @return all rental records
      */
     @Operation(summary = "Get all rentals")
@@ -64,6 +55,7 @@ public class RentalController {
 
     /**
      * Returns a specific rental by its ID.
+     * 
      * @param id ID of the rental
      * @return rental if found
      */
@@ -77,6 +69,7 @@ public class RentalController {
 
     /**
      * Creates a new rental entry with an image upload.
+     * 
      * @param rentalRequest rental data
      * @param bindingResult validation results
      * @return created rental or error details
@@ -101,12 +94,10 @@ public class RentalController {
         String contentType = picture.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             return ResponseEntity.badRequest().body(
-                Map.of(
-                    "error", "Invalid file type",
-                    "message", "Only image files are allowed",
-                    "receivedType", contentType != null ? contentType : "null"
-                )
-            );
+                    Map.of(
+                            "error", "Invalid file type",
+                            "message", "Only image files are allowed",
+                            "receivedType", contentType != null ? contentType : "null"));
         }
 
         try {
@@ -130,46 +121,10 @@ public class RentalController {
     }
 
     /**
-     * Deletes a rental by its ID.
-     * @param id ID of the rental
-     */
-    @Operation(summary = "Delete rental by ID")
-    @ApiResponse(responseCode = "204", description = "Rental deleted")
-    @DeleteMapping("/{id}")
-    public void deleteRental(@PathVariable Long id) {
-        rentalService.deleteRental(id);
-    }
-
-    /**
-     * Updates an existing rental.
-     * @param id ID of the rental
-     * @param rental rental data to update
-     * @return updated rental or newly created rental
-     */
-    @Operation(summary = "Update an existing rental")
-    @ApiResponse(responseCode = "200", description = "Rental updated or created")
-    @PutMapping("/{id}")
-    public Rental updateRental(@PathVariable Long id, @RequestBody Rental rental) {
-        return rentalService.getRentalById(id)
-                .map(existing -> {
-                    existing.setName(rental.getName());
-                    existing.setSurface(rental.getSurface());
-                    existing.setPrice(rental.getPrice());
-                    existing.setPicture(rental.getPicture());
-                    existing.setDescription(rental.getDescription());
-                    existing.setOwnerId(rental.getOwnerId());
-                    return rentalService.saveRental(existing);
-                })
-                .orElseGet(() -> {
-                    rental.setId(id.intValue());
-                    return rentalService.saveRental(rental);
-                });
-    }
-
-    /**
      * Converts a RentalRequest DTO to a Rental entity.
+     * 
      * @param rentalRequest the request DTO
-     * @param fileName uploaded image filename
+     * @param fileName      uploaded image filename
      * @return Rental entity
      */
     private Rental convertToEntity(RentalRequest rentalRequest, String fileName) {
@@ -181,5 +136,48 @@ public class RentalController {
         rental.setOwnerId(rentalRequest.getOwnerId().intValue());
         rental.setPicture(fileName);
         return rental;
+    }
+
+    /**
+     * Deletes a rental by its ID.
+     * 
+     * @param id ID of the rental
+     */
+    @Operation(summary = "Delete rental by ID")
+    @ApiResponse(responseCode = "204", description = "Rental deleted")
+    @DeleteMapping("/{id}")
+    public void deleteRental(@PathVariable Long id) {
+        rentalService.deleteRental(id);
+    }
+
+    /**
+     * Updates an existing rental.
+     * 
+     * @param id     ID of the rental
+     * @param rental rental data to update
+     * @return updated rental or newly created rental
+     */
+    @Operation(summary = "Update an existing rental")
+    @ApiResponse(responseCode = "200", description = "Rental updated or created")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateRental(
+            @PathVariable Long id,
+            @Valid @RequestBody RentalUpdateRequest updateRequest,
+            BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
+
+        return rentalService.getRentalById(id)
+                .map(existing -> {
+                    existing.setName(updateRequest.getName());
+                    existing.setSurface(updateRequest.getSurface());
+                    existing.setPrice(updateRequest.getPrice());
+                    existing.setDescription(updateRequest.getDescription());
+                    // existing.setOwnerId(updateRequest.getOwnerId());
+                    return ResponseEntity.ok(rentalService.saveRental(existing));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
