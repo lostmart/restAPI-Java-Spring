@@ -101,7 +101,11 @@ public class RentalController {
         }
 
         try {
-            String originalFilename = StringUtils.cleanPath(picture.getOriginalFilename());
+            String rawFilename = picture.getOriginalFilename();
+            if (rawFilename == null || rawFilename.isBlank()) {
+                return ResponseEntity.badRequest().body("Invalid or missing file name.");
+            }
+            String originalFilename = StringUtils.cleanPath(rawFilename);
             String fileName = UUID.randomUUID() + "_" + originalFilename;
 
             Path uploadPath = Paths.get("uploads");
