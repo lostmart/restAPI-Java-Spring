@@ -1,6 +1,7 @@
 package com.chaptoporg.controller;
 
 import com.chaptoporg.dto.RentalRequest;
+import com.chaptoporg.dto.RentalResponse;
 import com.chaptoporg.dto.RentalUpdateRequest;
 import com.chaptoporg.model.Rental;
 import com.chaptoporg.service.RentalService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 
 import java.io.IOException;
@@ -20,10 +22,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +43,9 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 @Tag(name = "Rentals", description = "Endpoints for managing rentals")
 public class RentalController {
 
+    @Value("${app.base-url:http://localhost:3000}") // Make configurable
+    private String baseUrl;
+
     @Autowired
     private RentalService rentalService;
 
@@ -49,8 +57,13 @@ public class RentalController {
     @Operation(summary = "Get all rentals")
     @ApiResponse(responseCode = "200", description = "List of rentals")
     @GetMapping
-    public Iterable<Rental> getAllRentals() {
-        return rentalService.getAllRentals();
+    public ResponseEntity<List<RentalResponse>> getAllRentals() {
+        List<RentalResponse> responseList = StreamSupport
+                .stream(rentalService.getAllRentals().spliterator(), false)
+                .map(rental -> new RentalResponse(rental, baseUrl))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responseList);
     }
 
     /**
