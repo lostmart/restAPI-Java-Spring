@@ -115,33 +115,65 @@ Bearer eyJhbGciOiJIUzI1NiJ9...
 - **_Mockoon:_** Simulate endpoints if needed
 - **_phpMyAdmin:_** View & edit MySQL data easily
 
+### 📬 Postman Collection
+
+A Postman collection is included to help test all API endpoints quickly.
+
+- File: `ressources/postman/rental.postman_collection.json`
+- To use:
+  1. Open Postman.
+  2. Import the collection.
+  3. Adjust environment variables like the base URL or JWT token as needed.
+
+### 🧪 Mock API (Mockoon)
+
+A Mockoon environment is provided for simulating the API before full backend integration. This is useful for frontend testing or prototyping.
+
+- File: `ressources/mockoon/rental-oc.json`
+- To use:
+  1. Open Mockoon.
+  2. Import the JSON file.
+  3. Start the server and use it to simulate endpoints locally.
+
+### 🗃️ Database Initialization Script
+
+To simplify MySQL database setup, an SQL script is provided.
+
+- File: `ressources/sql/script.sql`
+- This script:
+  - Creates the `chatop` database (if not already created).
+  - Optionally includes sample data (if added).
+- To use:
+  1. Open phpMyAdmin or another MySQL tool.
+  2. Execute the contents of `script.sql` to initialize your database schema.
 
 ## 🖼️ Image Uploads for Rentals
 
 This project supports uploading an image file when creating a new rental.
 
 - Endpoint:
+
 ```bash
 POST /api/rentals
 Content-Type: multipart/form-data
 ```
 
 - Required form fields:
+
   - name (String)
   - surface (Integer)
   - price (Integer)
   - description (String)
   - ownerId (Integer)
-  - picture (Image file)   
+  - picture (Image file)
 
 - Uploaded images are:
   - Renamed with a UUID prefix to avoid filename collisions.
   - Stored locally in the /uploads directory relative to the project root.
   - Served statically at the path:
-`http://localhost:3000/uploads/{filename}`
+    `http://localhost:3000/uploads/{filename}`
 
 The directory is created automatically at runtime. Make sure the application has write permission to the project root.
-
 
 ## ⚠️ Notes
 
